@@ -103,26 +103,39 @@ const isFdReady = (fd: number) =>
     ),
   );
 
+const makeSocketStream = (fd: number): Readable => {
+  const stream = new Net.Socket({
+    fd,
+    readable: true,
+    writable: false,
+  });
+  stream.setEncoding("utf8");
+  return stream;
+};
+
 const makeBootstrapInputStream = (fd: number) =>
   Effect.try<Readable, BootstrapError>({
     try: () => {
       const fdPath = resolveFdPath(fd);
       if (fdPath === undefined) {
-        const stream = new Net.Socket({
-          fd,
-          readable: true,
-          writable: false,
-        });
-        stream.setEncoding("utf8");
-        return stream;
+        return makeSocketStream(fd);
       }
 
-      const streamFd = NFS.openSync(fdPath, "r");
-      return NFS.createReadStream("", {
-        fd: streamFd,
-        encoding: "utf8",
-        autoClose: true,
-      });
+      try {
+        const streamFd = NFS.openSync(fdPath, "r");
+        return NFS.createReadStream("", {
+          fd: streamFd,
+          encoding: "utf8",
+          autoClose: true,
+        });
+      } catch (openError: unknown) {
+        // On Linux, pipes cannot be re-opened via /proc/self/fd/N (ENXIO).
+        // Fall back to reading the fd directly via a socket stream.
+        if (openError instanceof Error && "code" in openError && openError.code === "ENXIO") {
+          return makeSocketStream(fd);
+        }
+        throw openError;
+      }
     },
     catch: (error) =>
       new BootstrapError({

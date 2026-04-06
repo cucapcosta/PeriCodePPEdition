@@ -13,6 +13,7 @@ import {
   nativeImage,
   nativeTheme,
   protocol,
+  session,
   shell,
 } from "electron";
 import type { MenuItemConstructorOptions } from "electron";
@@ -1267,6 +1268,27 @@ function createWindow(): BrowserWindow {
       sandbox: true,
     },
   });
+
+  // Strip X-Frame-Options and frame-ancestors CSP from Notion responses so
+  // they can be embedded in iframes within the app.
+  session.defaultSession.webRequest.onHeadersReceived(
+    { urls: ["https://*.notion.so/*", "https://*.notion.site/*"] },
+    (details, callback) => {
+      const headers = { ...details.responseHeaders };
+      for (const key of Object.keys(headers)) {
+        const lower = key.toLowerCase();
+        if (lower === "x-frame-options") {
+          delete headers[key];
+        }
+        if (lower === "content-security-policy") {
+          headers[key] = (headers[key] ?? []).map((value) =>
+            value.replace(/frame-ancestors\s+[^;]+;?/gi, ""),
+          );
+        }
+      }
+      callback({ responseHeaders: headers });
+    },
+  );
 
   window.webContents.on("context-menu", (event, params) => {
     event.preventDefault();

@@ -123,12 +123,7 @@ export function NotionEmbed({ id, title }: { id: NotionLinkId; title: string }) 
             </form>
           </div>
         ) : (
-          <iframe
-            src={toEmbedUrl(link)}
-            className="flex-1 border-0"
-            title={title}
-            sandbox="allow-scripts allow-popups allow-forms"
-          />
+          <iframe src={toEmbedUrl(link)} className="flex-1 border-0" title={title} />
         )}
       </div>
     </SidebarInset>
