@@ -37,6 +37,7 @@ import { Button } from "../ui/button";
 import { clamp } from "effect/Number";
 import { estimateTimelineMessageHeight } from "../timelineHeight";
 import { buildExpandedImagePreview, ExpandedImagePreview } from "./ExpandedImagePreview";
+import { HtmlPreviewCard } from "./HtmlPreviewCard";
 import { ProposedPlanCard } from "./ProposedPlanCard";
 import { ChangedFilesTree } from "./ChangedFilesTree";
 import { DiffStatLabel, hasNonZeroStat } from "./DiffStatLabel";
@@ -507,6 +508,27 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                         resolvedTheme={resolvedTheme}
                         onOpenTurnDiff={onOpenTurnDiff}
                       />
+                    </div>
+                  );
+                })()}
+                {(() => {
+                  const turnSummary = turnDiffSummaryByAssistantMessageId.get(row.message.id);
+                  if (!turnSummary || !markdownCwd) return null;
+                  const htmlFiles = turnSummary.files
+                    .filter(
+                      (f) =>
+                        f.path.endsWith(".html") && (f.kind === "modified" || f.kind === "added"),
+                    )
+                    .map((f) => ({
+                      path: f.path,
+                      name: f.path.split("/").pop() ?? f.path,
+                    }));
+                  if (htmlFiles.length === 0) return null;
+                  return (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {htmlFiles.map((file) => (
+                        <HtmlPreviewCard key={file.path} cwd={markdownCwd} file={file} />
+                      ))}
                     </div>
                   );
                 })()}

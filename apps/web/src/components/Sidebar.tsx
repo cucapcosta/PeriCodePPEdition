@@ -1,6 +1,7 @@
 import {
   ArrowLeftIcon,
   ArrowUpDownIcon,
+  BookOpenIcon,
   ChevronRightIcon,
   FolderIcon,
   GitPullRequestIcon,
@@ -381,6 +382,9 @@ export default function Sidebar() {
   );
   const navigate = useNavigate();
   const isOnSettings = useLocation({ select: (loc) => loc.pathname === "/settings" });
+  const isOnNotionPage = useLocation({
+    select: (loc) => loc.pathname === "/notion-luiza" || loc.pathname === "/notion-rapha-davi",
+  });
   const appSettings = useSettings();
   const { updateSettings } = useUpdateSettings();
   const { handleNewThread } = useHandleNewThread();
@@ -1832,7 +1836,27 @@ export default function Sidebar() {
       <SidebarFooter className="p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            {isOnSettings ? (
+            <SidebarMenuButton
+              size="sm"
+              className="gap-2 px-2 py-1.5 text-muted-foreground/70 hover:bg-accent hover:text-foreground"
+              onClick={() => void navigate({ to: "/notion-luiza" })}
+            >
+              <BookOpenIcon className="size-3.5" />
+              <span className="text-xs">Notion Luiza</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="sm"
+              className="gap-2 px-2 py-1.5 text-muted-foreground/70 hover:bg-accent hover:text-foreground"
+              onClick={() => void navigate({ to: "/notion-rapha-davi" })}
+            >
+              <BookOpenIcon className="size-3.5" />
+              <span className="text-xs">Notion Rapha/Davi</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            {isOnSettings || isOnNotionPage ? (
               <SidebarMenuButton
                 size="sm"
                 className="gap-2 px-2 py-1.5 text-muted-foreground/70 hover:bg-accent hover:text-foreground"

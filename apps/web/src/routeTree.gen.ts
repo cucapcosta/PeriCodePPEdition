@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatRouteImport } from './routes/_chat'
 import { Route as ChatIndexRouteImport } from './routes/_chat.index'
 import { Route as ChatSettingsRouteImport } from './routes/_chat.settings'
+import { Route as ChatNotionLuizaRouteImport } from './routes/_chat.notion-luiza'
+import { Route as ChatNotionRaphaDaviRouteImport } from './routes/_chat.notion-rapha-davi'
 import { Route as ChatThreadIdRouteImport } from './routes/_chat.$threadId'
 
 const ChatRoute = ChatRouteImport.update({
@@ -28,6 +30,16 @@ const ChatSettingsRoute = ChatSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => ChatRoute,
 } as any)
+const ChatNotionLuizaRoute = ChatNotionLuizaRouteImport.update({
+  id: '/notion-luiza',
+  path: '/notion-luiza',
+  getParentRoute: () => ChatRoute,
+} as any)
+const ChatNotionRaphaDaviRoute = ChatNotionRaphaDaviRouteImport.update({
+  id: '/notion-rapha-davi',
+  path: '/notion-rapha-davi',
+  getParentRoute: () => ChatRoute,
+} as any)
 const ChatThreadIdRoute = ChatThreadIdRouteImport.update({
   id: '/$threadId',
   path: '/$threadId',
@@ -38,10 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof ChatIndexRoute
   '/$threadId': typeof ChatThreadIdRoute
   '/settings': typeof ChatSettingsRoute
+  '/notion-luiza': typeof ChatNotionLuizaRoute
+  '/notion-rapha-davi': typeof ChatNotionRaphaDaviRoute
 }
 export interface FileRoutesByTo {
   '/$threadId': typeof ChatThreadIdRoute
   '/settings': typeof ChatSettingsRoute
+  '/notion-luiza': typeof ChatNotionLuizaRoute
+  '/notion-rapha-davi': typeof ChatNotionRaphaDaviRoute
   '/': typeof ChatIndexRoute
 }
 export interface FileRoutesById {
@@ -49,14 +65,16 @@ export interface FileRoutesById {
   '/_chat': typeof ChatRouteWithChildren
   '/_chat/$threadId': typeof ChatThreadIdRoute
   '/_chat/settings': typeof ChatSettingsRoute
+  '/_chat/notion-luiza': typeof ChatNotionLuizaRoute
+  '/_chat/notion-rapha-davi': typeof ChatNotionRaphaDaviRoute
   '/_chat/': typeof ChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$threadId' | '/settings'
+  fullPaths: '/' | '/$threadId' | '/settings' | '/notion-luiza' | '/notion-rapha-davi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$threadId' | '/settings' | '/'
-  id: '__root__' | '/_chat' | '/_chat/$threadId' | '/_chat/settings' | '/_chat/'
+  to: '/$threadId' | '/settings' | '/notion-luiza' | '/notion-rapha-davi' | '/'
+  id: '__root__' | '/_chat' | '/_chat/$threadId' | '/_chat/settings' | '/_chat/notion-luiza' | '/_chat/notion-rapha-davi' | '/_chat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -86,6 +104,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChatSettingsRouteImport
       parentRoute: typeof ChatRoute
     }
+    '/_chat/notion-luiza': {
+      id: '/_chat/notion-luiza'
+      path: '/notion-luiza'
+      fullPath: '/notion-luiza'
+      preLoaderRoute: typeof ChatNotionLuizaRouteImport
+      parentRoute: typeof ChatRoute
+    }
+    '/_chat/notion-rapha-davi': {
+      id: '/_chat/notion-rapha-davi'
+      path: '/notion-rapha-davi'
+      fullPath: '/notion-rapha-davi'
+      preLoaderRoute: typeof ChatNotionRaphaDaviRouteImport
+      parentRoute: typeof ChatRoute
+    }
     '/_chat/$threadId': {
       id: '/_chat/$threadId'
       path: '/$threadId'
@@ -99,12 +131,16 @@ declare module '@tanstack/react-router' {
 interface ChatRouteChildren {
   ChatThreadIdRoute: typeof ChatThreadIdRoute
   ChatSettingsRoute: typeof ChatSettingsRoute
+  ChatNotionLuizaRoute: typeof ChatNotionLuizaRoute
+  ChatNotionRaphaDaviRoute: typeof ChatNotionRaphaDaviRoute
   ChatIndexRoute: typeof ChatIndexRoute
 }
 
 const ChatRouteChildren: ChatRouteChildren = {
   ChatThreadIdRoute: ChatThreadIdRoute,
   ChatSettingsRoute: ChatSettingsRoute,
+  ChatNotionLuizaRoute: ChatNotionLuizaRoute,
+  ChatNotionRaphaDaviRoute: ChatNotionRaphaDaviRoute,
   ChatIndexRoute: ChatIndexRoute,
 }
 
