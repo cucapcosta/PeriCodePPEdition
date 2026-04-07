@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDownIcon,
+  DownloadIcon,
   InfoIcon,
   LoaderIcon,
   PlusIcon,
@@ -25,6 +26,7 @@ import {
   resolveAppModelSelectionState,
 } from "../modelSelection";
 import { APP_VERSION } from "../branding";
+import type { DesktopUpdateState } from "@t3tools/contracts";
 import { Button } from "../components/ui/button";
 import { Collapsible, CollapsibleContent } from "../components/ui/collapsible";
 import { Input } from "../components/ui/input";
@@ -282,6 +284,102 @@ function SettingResetButton({ label, onClick }: { label: string; onClick: () => 
       <TooltipPopup side="top">Reset to default</TooltipPopup>
     </Tooltip>
   );
+}
+
+function SettingsUpdateRow() {
+  const [updateState, setUpdateState] = useState<DesktopUpdateState | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    const bridge = window.desktopBridge;
+    if (!bridge?.getUpdateState || !bridge.onUpdateState) return;
+
+    let disposed = false;
+    const unsubscribe = bridge.onUpdateState((next) => {
+      if (!disposed) setUpdateState(next);
+    });
+    void bridge.getUpdateState().then((next) => {
+      if (!disposed) setUpdateState(next);
+    });
+    return () => {
+      disposed = true;
+      unsubscribe();
+    };
+  }, []);
+
+  const handleCheck = useCallback(() => {
+    const bridge = window.desktopBridge;
+    if (!bridge?.checkForUpdates) return;
+    setChecking(true);
+    void bridge.checkForUpdates().finally(() => setChecking(false));
+  }, []);
+
+  const handleDownload = useCallback(() => {
+    void window.desktopBridge?.downloadUpdate();
+  }, []);
+
+  const handleInstall = useCallback(() => {
+    void window.desktopBridge?.installUpdate();
+  }, []);
+
+  const status = updateState?.status ?? "idle";
+  const isChecking = checking || status === "checking";
+  const downloadPercent = updateState?.downloadPercent;
+
+  let description = "Check for new versions.";
+  let actionButton: ReactNode = (
+    <Button size="xs" variant="outline" disabled={isChecking} onClick={handleCheck}>
+      {isChecking ? (
+        <>
+          <LoaderIcon className="size-3 animate-spin" />
+          Checking...
+        </>
+      ) : (
+        <>
+          <RefreshCwIcon className="size-3" />
+          Check for updates
+        </>
+      )}
+    </Button>
+  );
+
+  if (status === "up-to-date") {
+    description = "You are on the latest version.";
+  } else if (status === "available") {
+    description = `Version ${updateState?.availableVersion ?? "unknown"} is available.`;
+    actionButton = (
+      <div className="flex items-center gap-2">
+        {actionButton}
+        <Button size="xs" variant="default" onClick={handleDownload}>
+          <DownloadIcon className="size-3" />
+          Download
+        </Button>
+      </div>
+    );
+  } else if (status === "downloading") {
+    const pct = typeof downloadPercent === "number" ? `${Math.floor(downloadPercent)}%` : "";
+    description = `Downloading update${pct ? ` (${pct})` : ""}...`;
+    actionButton = (
+      <Button size="xs" variant="outline" disabled>
+        <LoaderIcon className="size-3 animate-spin" />
+        Downloading{pct ? ` ${pct}` : ""}
+      </Button>
+    );
+  } else if (status === "downloaded") {
+    description = `Version ${updateState?.downloadedVersion ?? updateState?.availableVersion ?? "unknown"} is ready to install.`;
+    actionButton = (
+      <div className="flex items-center gap-2">
+        {actionButton}
+        <Button size="xs" variant="default" onClick={handleInstall}>
+          Restart & Install
+        </Button>
+      </div>
+    );
+  } else if (status === "error") {
+    description = updateState?.message ?? "Update check failed.";
+  }
+
+  return <SettingsRow title="Updates" description={description} control={actionButton} />;
 }
 
 function SettingsRouteView() {
@@ -1301,6 +1399,7 @@ function SettingsRouteView() {
                   <code className="text-xs font-medium text-muted-foreground">{APP_VERSION}</code>
                 }
               />
+              {isElectron && <SettingsUpdateRow />}
             </SettingsSection>
           </div>
         </div>
