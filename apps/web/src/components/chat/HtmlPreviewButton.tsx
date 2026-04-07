@@ -17,7 +17,8 @@ export function HtmlPreviewButton({ cwd }: HtmlPreviewButtonProps) {
       cwd,
       query: ".html",
       limit: 50,
-      staleTime: 10_000,
+      staleTime: 5_000,
+      refetchInterval: 5_000,
     }),
   );
 

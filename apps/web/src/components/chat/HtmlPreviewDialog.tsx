@@ -1,5 +1,7 @@
 import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
+import { isElectron } from "~/env";
+import { isMacPlatform } from "~/lib/utils";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -47,7 +49,9 @@ export function HtmlPreviewDialog({ open, onOpenChange, cwd, htmlFiles }: HtmlPr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
         <DialogBackdrop />
-        <DialogViewport className="!grid-rows-[1fr] !p-4">
+        <DialogViewport
+          className={`!grid-rows-[1fr] !p-4${isElectron && isMacPlatform(navigator.platform) ? " pt-14" : ""}`}
+        >
           <DialogPopup
             showCloseButton
             bottomStickOnMobile={false}

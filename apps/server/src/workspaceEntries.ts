@@ -9,7 +9,7 @@ import {
   ProjectSearchEntriesResult,
 } from "@t3tools/contracts";
 
-const WORKSPACE_CACHE_TTL_MS = 15_000;
+const WORKSPACE_CACHE_TTL_MS = 5_000;
 const WORKSPACE_CACHE_MAX_KEYS = 4;
 const WORKSPACE_INDEX_MAX_ENTRIES = 25_000;
 const WORKSPACE_SCAN_READDIR_CONCURRENCY = 32;
